@@ -48,7 +48,7 @@ def theano_expression(setting, Pv_vec, candidate, capacity, latency, decayFactor
 
     const3 = mu3 * T.sum(T.smallest(0, P))
 
-    obj = delta * obj1 + obj2 - const1 - const2 - const3  # Minimising the results
+    obj = delta * obj1 /(-obj2) - const1 - const2 - const3  # Minimising the results
 
     if isGradient:
         g = T.grad(obj, P_red)

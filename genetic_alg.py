@@ -2,12 +2,12 @@ import random
 from deap import creator, base, tools
 import multiprocessing
 import logging
+import matplotlib.pyplot as plt
 from theano_exp import theano_expression
 from setting import Setting
 from gradient_descent_alg import RMSprop
 
-random.seed(1)
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
 
 # ========================================================================================
 # Knapsack problem setting
@@ -50,8 +50,8 @@ logging.basicConfig(level=logging.INFO)
 
 
 setting = Setting()
-IND_SIZE = 10
-POP_SIZE = 50
+IND_SIZE = setting.ctlNum
+POP_SIZE = 200
 # CXPB  is the probability with which two individuals are crossed
 # MUTPB is the probability for mutating an individual
 CXPB, MUTPB = 1, 0.1
@@ -134,9 +134,12 @@ def main():
     # Variable keeping track of the number of generations
     g = 0
     std = 100
+    elitist_ind = []
+    elitist_fit = []
+
 
     # Begin the evolution
-    while g < 200 and std > 0.001:
+    while g < 300 :
         # A new generation
         g = g + 1
         print("-- Generation %i --" % g)
@@ -180,6 +183,8 @@ def main():
         std = abs(sum2 / length - mean ** 2) ** 0.5
 
         best_ind = tools.selBest(pop, 1)[0]
+        elitist_ind.append(best_ind)
+        elitist_fit.append(best_ind.fitness.values)
         print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
 
         print("  Min %s" % min(fits))
@@ -191,7 +196,16 @@ def main():
 
     best_ind = tools.selBest(pop, 1)[0]
     print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
+    plt.figure(1)
+    plt.subplot(211)
+    plt.plot(elitist_ind)
+    plt.subplot(212)
+    plt.plot(elitist_fit)
+    plt.show()
 
 
 if __name__ == "__main__":
     main()
+
+
+
