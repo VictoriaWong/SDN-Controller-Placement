@@ -1,10 +1,11 @@
 import numpy
 import logging
-# import matplotlib.pyplot as plt
-# import random
 
-# verifyGDvalue = []
-# random.seed(71456)
+import matplotlib.pyplot as plt
+import random
+
+verifyGDvalue = []
+random.seed(71456)
 
 
 def extract(vec, index):
@@ -33,7 +34,7 @@ def Batch_RMSprop(func, setting, candidate):
 # Gradient descent using RMSprop
 def RMSprop(func, setting, candidate):
     learningRate = 0.002
-    iterationNum = 60
+    iterationNum = 70
     moving_avg = []
     moving_win = 10
 
@@ -63,9 +64,9 @@ def RMSprop(func, setting, candidate):
     #     else:
     #         para = numpy.random.random(paraLen - 1)
 
-    # print "start gradient evaluation"
-    # cost = func(setting, para, candidate, a, D, beta, False)
-    # verifyGDvalue.append(cost)
+    print "start gradient evaluation"
+    cost = func(setting, para, candidate, a, D, beta, False)
+    verifyGDvalue.append(cost)
 
     g = func(setting, para, candidate, a, D, beta, True)
     eg2 = numpy.zeros(len(g[0]))  # initializing the moving average of g
@@ -78,8 +79,8 @@ def RMSprop(func, setting, candidate):
         para = paraOld - learningRate * g / numpy.sqrt(eg2 + e)  # update solution
         para = numpy.ndarray.tolist(para)[0]
 
-        # cost = func(setting, para, candidate, a, D, beta, False)
-        # verifyGDvalue.append(cost)
+        cost = func(setting, para, candidate, a, D, beta, False)
+        verifyGDvalue.append(cost)
 
         # gdbest = updateGdbest(gdbest, cost)
         g = func(setting, para, candidate, a, D, beta, True)
@@ -93,15 +94,17 @@ def RMSprop(func, setting, candidate):
     return [sum(moving_avg)*1.0/len(moving_avg)]
 
 
-# from theano_exp import theano_expression
-# from setting import Setting
-# import random
-# setting = Setting()
-# individual = [random.randint(0, 1) for i in range(setting.ctlNum)]
-# print individual
-# fitness = RMSprop(theano_expression, setting, individual)
-# print fitness
-# # plt.figure(1)
-# # plt.plot(verifyGDvalue)
-# # plt.title((0.002, fitness),fontsize=10)
-# # plt.show()
+from theano_exp import theano_expression
+from setting import Setting
+
+setting = Setting()
+
+individual = [0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+
+fitness = RMSprop(theano_expression, setting, individual)
+print fitness
+plt.figure(1)
+plt.plot(verifyGDvalue)
+plt.title((0.002, fitness),fontsize=10)
+plt.show()

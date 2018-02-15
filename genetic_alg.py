@@ -61,6 +61,9 @@ def evalMin(individual):
     logging.info("Evaulating %s " % individual)
     if max(individual) == 0:
         return 10000,
+    temp = [a*b for a,b in zip(setting.capacity, individual)]
+    if sum(temp) < setting.arrivalRate:
+        return 10000,
     fitness = RMSprop(theano_expression, setting, individual)
     return fitness[0],
 

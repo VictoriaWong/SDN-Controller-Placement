@@ -25,8 +25,9 @@ def theano_expression(setting, Pv_vec, candidate, capacity, latency, decayFactor
     P = T.set_subtensor(P[-1], 1 - T.sum(P_red))
 
     theta_n = P * lamda  # (N) the workload of the nth controller
-    U_n = T.inv(a) * theta_n  # (N) the utilisation of the nth controller
-    U = T.sum(U_n) * T.inv(T.sum(x))  # average utilisation
+    # U_n = T.inv(a) * theta_n  # (N) the utilisation of the nth controller
+    # U = T.sum(U_n) * T.inv(T.sum(x))  # average utilisation
+    U = lamda * T.inv(T.dot(x, a))
     obj2 = - U
 
     diff = T.largest(10, T.sub(a, theta_n))  # set the difference of a and theta_n to
@@ -48,7 +49,8 @@ def theano_expression(setting, Pv_vec, candidate, capacity, latency, decayFactor
 
     const3 = mu3 * T.sum(T.smallest(0, P))
 
-    obj = delta * obj1 /(-obj2) - const1 - const2 - const3  # Minimising the results
+    # obj = delta * obj1 / (-obj2) - const1 - const2 - const3  # Minimising the results
+    obj = delta * obj1 * T.dot(x, a) - const1 - const2 - const3  # Minimising the results
 
     if isGradient:
         g = T.grad(obj, P_red)
