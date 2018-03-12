@@ -2,7 +2,7 @@ import random
 from deap import creator, base, tools
 import multiprocessing
 import logging
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from theano_exp import theano_expression
 from setting import Setting
 from gradient_descent_alg import RMSprop
@@ -60,10 +60,10 @@ CXPB, MUTPB = 1, 0.1
 def evalMin(individual):
     logging.info("Evaulating %s " % individual)
     if max(individual) == 0:
-        return 10000,
+        return 100000000,
     temp = [a*b for a,b in zip(setting.capacity, individual)]
     if sum(temp) < setting.arrivalRate:
-        return 10000,
+        return 100000000,
     fitness = RMSprop(theano_expression, setting, individual)
     return fitness[0],
 
@@ -110,7 +110,7 @@ toolbox.register("selectGeneration", tools.selBest)
 
 
 def main():
-    random.seed(64)
+    random.seed(1)
 
     pool = multiprocessing.Pool(8)
 
@@ -142,7 +142,7 @@ def main():
 
 
     # Begin the evolution
-    while g < 300 :
+    while g < 300:
         # A new generation
         g = g + 1
         print("-- Generation %i --" % g)
@@ -199,12 +199,12 @@ def main():
 
     best_ind = tools.selBest(pop, 1)[0]
     print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
-    plt.figure(1)
-    plt.subplot(211)
-    plt.plot(elitist_ind)
-    plt.subplot(212)
-    plt.plot(elitist_fit)
-    plt.show()
+    # plt.figure(1)
+    # plt.subplot(211)
+    # plt.plot(elitist_ind)
+    # plt.subplot(212)
+    # plt.plot(elitist_fit)
+    # plt.show()
 
 
 if __name__ == "__main__":

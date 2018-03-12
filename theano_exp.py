@@ -4,7 +4,7 @@ import sys
 import numpy
 
 # Calculate the value and gradient of the objective function using theano
-def theano_expression(setting, Pv_vec, candidate, capacity, latency, decayFactor, isGradient=True):
+def theano_expression(setting, Pv_vec, capacity, latency, decayFactor, isGradient=True):
     if len(setting.mu) < 3:
         print "invalid parameter for theano expression"
         sys.exit(1)
@@ -14,7 +14,7 @@ def theano_expression(setting, Pv_vec, candidate, capacity, latency, decayFactor
     a = T.dvector('a')  # (N) controller capacity
     D = T.dvector('D')  # (N) delay among controllers and schedulers
     beta = T.dvector('beta')  # N
-    x = T.dvector('x')  # (N) controller selection decision
+    # x = T.dvector('x')  # (N) controller selection decision
     delta = T.dscalar('delta')  # Lagrange multiplier for the setup cost
     mu1 = T.dscalar('mu1')
     mu2 = T.dscalar('mu2')
@@ -27,7 +27,7 @@ def theano_expression(setting, Pv_vec, candidate, capacity, latency, decayFactor
     theta_n = P * lamda  # (N) the workload of the nth controller
     # U_n = T.inv(a) * theta_n  # (N) the utilisation of the nth controller
     # U = T.sum(U_n) * T.inv(T.sum(x))  # average utilisation
-    U = lamda * T.inv(T.dot(x, a))
+    U = lamda * T.inv(T.sum(a))
     obj2 = - U
 
     diff = T.largest(10, T.sub(a, theta_n))  # set the difference of a and theta_n to
@@ -49,16 +49,16 @@ def theano_expression(setting, Pv_vec, candidate, capacity, latency, decayFactor
 
     const3 = mu3 * T.sum(T.smallest(0, P))
 
-    # obj = delta * obj1 / (-obj2) - const1 - const2 - const3  # Minimising the results
-    obj = delta * obj1 * T.dot(x, a) - const1 - const2 - const3  # Minimising the results
+    obj = delta * obj1 / (-obj2) - const1 - const2 - const3  # Minimising the results
+    # obj = delta * obj1 * T.dot(x, a) - const1 - const2 - const3  # Minimising the results
 
     if isGradient:
         g = T.grad(obj, P_red)
-        gradient = function(inputs=[P_red, lamda, a, D, beta, x, delta, mu1, mu2, mu3], outputs=[g])
-        return gradient(Pv_vec, setting.arrivalRate, capacity, latency, decayFactor, candidate, setting.dlt, setting.mu[0], setting.mu[1], setting.mu[2])
+        gradient = function(inputs=[P_red, lamda, a, D, beta, delta, mu1, mu2, mu3], outputs=[g], on_unused_input='warn')
+        return gradient(Pv_vec, setting.arrivalRate, capacity, latency, decayFactor, setting.dlt, setting.mu[0], setting.mu[1], setting.mu[2])
     else:
-        cost = function(inputs=[P_red, lamda, a, D, beta, x, delta, mu1, mu2, mu3], outputs=[obj])
-        return cost(Pv_vec, setting.arrivalRate, capacity, latency, decayFactor, candidate, setting.dlt, setting.mu[0], setting.mu[1], setting.mu[2])
+        cost = function(inputs=[P_red, lamda, a, D, beta, delta, mu1, mu2, mu3], outputs=[obj], on_unused_input='warn')
+        return cost(Pv_vec, setting.arrivalRate, capacity, latency, decayFactor, setting.dlt, setting.mu[0], setting.mu[1], setting.mu[2])
 
 
 
